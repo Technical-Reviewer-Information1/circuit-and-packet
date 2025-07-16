@@ -27,25 +27,36 @@ st.markdown("""
     font-weight: bold;
 }
 .success-box {
-    padding: 10px;
-    border-radius: 5px;
+    padding: 15px;
+    border-radius: 8px;
     background-color: #d4edda;
     border: 1px solid #c3e6cb;
     color: #155724;
+    margin: 10px 0;
 }
 .error-box {
-    padding: 10px;
-    border-radius: 5px;
+    padding: 15px;
+    border-radius: 8px;
     background-color: #f8d7da;
     border: 1px solid #f5c6cb;
     color: #721c24;
+    margin: 10px 0;
 }
 .info-box {
-    padding: 10px;
-    border-radius: 5px;
+    padding: 15px;
+    border-radius: 8px;
     background-color: #d1ecf1;
     border: 1px solid #bee5eb;
     color: #0c5460;
+    margin: 10px 0;
+}
+.simulation-explanation {
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+    margin: 15px 0;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -64,62 +75,63 @@ def create_network_topology():
     """ネットワーク構成図を作成"""
     fig = go.Figure()
     
-    # ノード位置
-    nodes = {
-        'A': (0, 1),
-        'B': (2, 2),
-        'C': (4, 1),
-        'D': (1, 0),
-        'E': (3, 0)
+    # 拠点（旧ノード）位置
+    locations = {
+        '東京': (0, 1),
+        '大阪': (2, 2),
+        '福岡': (4, 1),
+        '名古屋': (1, 0),
+        '札幌': (3, 0)
     }
     
-    # エッジ（接続）
-    edges = [
-        ('A', 'B'), ('A', 'D'),
-        ('B', 'C'), ('B', 'E'),
-        ('C', 'E'), ('D', 'E')
+    # 接続線
+    connections = [
+        ('東京', '大阪'), ('東京', '名古屋'),
+        ('大阪', '福岡'), ('大阪', '札幌'),
+        ('福岡', '札幌'), ('名古屋', '札幌')
     ]
     
-    # エッジを描画
-    for edge in edges:
-        x0, y0 = nodes[edge[0]]
-        x1, y1 = nodes[edge[1]]
+    # 接続線を描画
+    for connection in connections:
+        x0, y0 = locations[connection[0]]
+        x1, y1 = locations[connection[1]]
         fig.add_trace(go.Scatter(
             x=[x0, x1], y=[y0, y1],
             mode='lines',
-            line=dict(color='gray', width=2),
+            line=dict(color='gray', width=3),
             showlegend=False,
             hoverinfo='none'
         ))
     
-    # ノードを描画
-    for node, (x, y) in nodes.items():
+    # 拠点を描画
+    for location, (x, y) in locations.items():
         fig.add_trace(go.Scatter(
             x=[x], y=[y],
             mode='markers+text',
-            marker=dict(size=30, color='lightblue', line=dict(width=2, color='darkblue')),
-            text=node,
+            marker=dict(size=40, color='lightblue', line=dict(width=3, color='darkblue')),
+            text=location,
             textposition='middle center',
+            textfont=dict(size=12, color='darkblue'),
             showlegend=False,
-            name=f'ノード {node}'
+            name=f'{location}の通信拠点'
         ))
     
     fig.update_layout(
-        title="ネットワーク構成図",
+        title="日本全国の通信ネットワーク",
         xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
         yaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
-        height=300,
-        margin=dict(l=0, r=0, t=30, b=0)
+        height=350,
+        margin=dict(l=0, r=0, t=50, b=0)
     )
     
     return fig
 
 def simulate_circuit_switching(source, destination, message_size, network_load):
     """回線交換方式のシミュレーション"""
-    # 接続確立時間（ネットワーク負荷に依存）
+    # 回線確保の待ち時間（ネットワーク負荷に依存）
     connection_time = random.uniform(1, 3) * (network_load / 50)
     
-    # 帯域幅確保の成否判定
+    # 専用回線確保の成否判定
     success_rate = max(0.3, 1 - (network_load - 50) / 100)
     connection_success = random.random() < success_rate
     
@@ -127,12 +139,16 @@ def simulate_circuit_switching(source, destination, message_size, network_load):
         return {
             'success': False,
             'total_time': connection_time,
-            'message': '回線が混雑しており、接続できませんでした',
-            'steps': ['接続要求', '回線混雑により失敗']
+            'message': '回線が混雑していて専用回線を確保できませんでした',
+            'steps': [
+                '📞 専用回線の確保を要求',
+                '❌ ネットワークが混雑しており、空いている回線がありません',
+                '🔄 しばらく待ってから再度お試しください'
+            ]
         }
     
     # 専用回線でのデータ転送
-    transfer_time = message_size / 10  # 10Mbpsと仮定
+    transfer_time = message_size / 10  # 10Mbpsの専用回線と仮定
     total_time = connection_time + transfer_time
     
     return {
@@ -140,12 +156,12 @@ def simulate_circuit_switching(source, destination, message_size, network_load):
         'total_time': total_time,
         'connection_time': connection_time,
         'transfer_time': transfer_time,
-        'message': f'専用回線で高速転送完了（{total_time:.2f}秒）',
+        'message': f'専用回線で安定した高速通信が完了しました！（合計{total_time:.2f}秒）',
         'steps': [
-            '接続要求',
-            f'回線確保（{connection_time:.1f}秒）',
-            f'専用回線でデータ転送（{transfer_time:.1f}秒）',
-            '接続切断'
+            '📞 専用回線の確保を要求',
+            f'🔗 専用回線を確保しました（{connection_time:.1f}秒かかりました）',
+            f'📡 専用回線でデータを一気に送信（{transfer_time:.1f}秒）',
+            '✅ 通信完了！回線を開放しました'
         ]
     }
 
@@ -160,25 +176,25 @@ def simulate_packet_switching(source, destination, message_size, network_load):
     failed_packets = 0
     
     for i in range(num_packets):
-        # ホップ数（経由ルータ数）
-        hops = random.randint(2, 5)
+        # 経由する中継地点の数
+        relay_points = random.randint(2, 5)
         
-        # 各ホップでの遅延（ネットワーク負荷に依存）
-        hop_delay = 0.05 * (1 + network_load / 100)
+        # 各中継地点での処理時間（ネットワーク負荷に依存）
+        relay_delay = 0.05 * (1 + network_load / 100)
         
         # パケット転送時間
-        transfer_time = packet_size / 5  # 5Mbpsと仮定（共有帯域）
+        transfer_time = packet_size / 5  # 5Mbpsの共有回線と仮定
         
-        # パケット損失の可能性
+        # パケットが途中で失われる可能性
         loss_rate = min(0.1, network_load / 1000)
         packet_lost = random.random() < loss_rate
         
         if packet_lost:
             failed_packets += 1
-            # 再送時間
-            packet_time = (hop_delay * hops + transfer_time) * 2
+            # 再送信のため時間が2倍かかる
+            packet_time = (relay_delay * relay_points + transfer_time) * 2
         else:
-            packet_time = hop_delay * hops + transfer_time
+            packet_time = relay_delay * relay_points + transfer_time
         
         packet_times.append(packet_time)
     
@@ -190,12 +206,12 @@ def simulate_packet_switching(source, destination, message_size, network_load):
         'num_packets': num_packets,
         'failed_packets': failed_packets,
         'packet_loss_rate': failed_packets / num_packets * 100,
-        'message': f'パケット分割して転送完了（{total_time:.2f}秒、{failed_packets}個再送）',
+        'message': f'データを分割して送信完了！（合計{total_time:.2f}秒、{failed_packets}個のパケットを再送信）',
         'steps': [
-            f'データを{num_packets}個のパケットに分割',
-            f'各パケットを個別にルーティング',
-            f'一部パケットロス発生（{failed_packets}個）',
-            '宛先で元のデータに復元'
+            f'📦 {message_size}MBのデータを{num_packets}個の小さなパケットに分割',
+            f'🚀 各パケットが別々のルートで目的地へ出発',
+            f'🔄 混雑により{failed_packets}個のパケットが途中で失われて再送信',
+            f'🧩 目的地で全パケットを組み立てて元のデータに復元'
         ]
     }
 
@@ -204,19 +220,19 @@ def create_comparison_chart(circuit_results, packet_results):
     if not circuit_results or not packet_results:
         return None
     
-    categories = ['転送時間', '信頼性', 'リソース効率']
+    categories = ['転送時間', '安定性', '効率性']
     
     # スコア計算（0-100）
     circuit_scores = [
         max(0, 100 - circuit_results[-1]['total_time'] * 10),  # 転送時間
-        100 if circuit_results[-1]['success'] else 0,  # 信頼性
-        30  # リソース効率（専用回線なので低い）
+        100 if circuit_results[-1]['success'] else 0,  # 安定性
+        30  # 効率性（専用回線なので低い）
     ]
     
     packet_scores = [
         max(0, 100 - packet_results[-1]['total_time'] * 10),  # 転送時間
-        max(0, 100 - packet_results[-1]['packet_loss_rate'] * 5),  # 信頼性
-        80  # リソース効率（共有なので高い）
+        max(0, 100 - packet_results[-1]['packet_loss_rate'] * 5),  # 安定性
+        80  # 効率性（共有なので高い）
     ]
     
     fig = go.Figure()
@@ -225,7 +241,7 @@ def create_comparison_chart(circuit_results, packet_results):
         r=circuit_scores,
         theta=categories,
         fill='toself',
-        name='回線交換方式',
+        name='📞 回線交換方式',
         line_color='red'
     ))
     
@@ -233,7 +249,7 @@ def create_comparison_chart(circuit_results, packet_results):
         r=packet_scores,
         theta=categories,
         fill='toself',
-        name='パケット交換方式',
+        name='📦 パケット交換方式',
         line_color='blue'
     ))
     
@@ -244,142 +260,193 @@ def create_comparison_chart(circuit_results, packet_results):
                 range=[0, 100]
             )),
         showlegend=True,
-        title="性能比較"
+        title="どちらの方式が優秀？性能比較"
     )
     
     return fig
 
 # メインアプリケーション
 st.markdown('<p class="big-font">📡 ネットワーク通信方式体験アプリ</p>', unsafe_allow_html=True)
-st.markdown("**回線交換方式**と**パケット交換方式**の違いを体験してみよう！")
+st.markdown("**電話のような通信**と**インターネットのような通信**の違いを体験してみよう！")
 
-# サイドバー
-st.sidebar.markdown("### 🎛️ シミュレーション設定")
-network_load = st.sidebar.slider("ネットワーク負荷 (%)", 0, 100, 50)
-st.session_state.network_load = network_load
-
-message_size = st.sidebar.selectbox(
-    "送信データサイズ",
-    [1, 5, 10, 50, 100],
-    index=2,
-    format_func=lambda x: f"{x} MB"
-)
-
-# 理論説明タブ
-tab1, tab2, tab3 = st.tabs(["📚 基礎知識", "🧪 シミュレーション", "📊 結果比較"])
+# タブ設定
+tab1, tab2, tab3 = st.tabs(["📚 基礎知識", "🧪 通信実験", "📊 結果比較"])
 
 with tab1:
-    st.markdown("### 🔄 回線交換方式 vs パケット交換方式")
+    st.markdown("### 🔄 2つの通信方式の違いを知ろう")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("#### 📞 回線交換方式（電話のような方式）")
+        st.markdown("#### 📞 回線交換方式（電話のような通信）")
         st.markdown("""
         <div class="info-box">
-        <strong>特徴：</strong><br>
-        • 通信前に専用の回線を確保<br>
-        • 一度接続すれば安定した通信<br>
-        • 使用中は他の人は使えない<br>
-        • 電話やビデオ通話に適している
+        <strong>どんな方式？</strong><br>
+        • 通話を始める前に、あなた専用の「通信の道」を確保<br>
+        • 一度つながれば、その道はあなただけのもの<br>
+        • 通話中は他の人はその道を使えない<br>
+        • 昔の電話や、今でもビデオ通話で使われている
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("**メリット：**")
-        st.write("✅ 安定した通信品質")
-        st.write("✅ 遅延が少ない")
-        st.write("✅ データ順序が保証される")
+        st.markdown("**良いところ：**")
+        st.write("✅ 安定してクリアな通信ができる")
+        st.write("✅ 遅れ（遅延）がほとんどない")
+        st.write("✅ データが順番通りに届く")
         
-        st.markdown("**デメリット：**")
-        st.write("❌ 回線が無駄になることがある")
-        st.write("❌ 混雑時は接続できない")
-        st.write("❌ 費用が高い")
+        st.markdown("**困るところ：**")
+        st.write("❌ 使わない時間も道を占領してしまう")
+        st.write("❌ 混雑していると接続できない")
+        st.write("❌ コストが高い")
     
     with col2:
-        st.markdown("#### 📦 パケット交換方式（インターネットの方式）")
+        st.markdown("#### 📦 パケット交換方式（インターネットの通信）")
         st.markdown("""
         <div class="info-box">
-        <strong>特徴：</strong><br>
-        • データを小さなパケットに分割<br>
-        • 各パケットが個別に最適ルートを選択<br>
-        • 回線を複数の通信で共有<br>
-        • インターネット通信の基本方式
+        <strong>どんな方式？</strong><br>
+        • 送りたいデータを小さな「荷物（パケット）」に分割<br>
+        • 各荷物が別々のルートで目的地へ向かう<br>
+        • みんなで道を譲り合いながら使う<br>
+        • インターネット、メール、SNSの基本方式
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("**メリット：**")
-        st.write("✅ 回線を効率的に共有")
-        st.write("✅ ネットワーク障害に強い")
-        st.write("✅ 費用が安い")
-        st.write("✅ 多くの人が同時利用可能")
+        st.markdown("**良いところ：**")
+        st.write("✅ みんなで効率よく道を共有できる")
+        st.write("✅ 道が壊れても別ルートで迂回できる")
+        st.write("✅ コストが安い")
+        st.write("✅ たくさんの人が同時に使える")
         
-        st.markdown("**デメリット：**")
-        st.write("❌ パケットロスの可能性")
-        st.write("❌ 遅延が変動する")
-        st.write("❌ 混雑時は速度低下")
+        st.markdown("**困るところ：**")
+        st.write("❌ 荷物が途中で失われることがある")
+        st.write("❌ 到着時間にバラつきがある")
+        st.write("❌ 混雑すると速度が遅くなる")
 
     # ネットワーク構成図
-    st.markdown("### 🌐 ネットワーク構成")
+    st.markdown("### 🌐 日本の通信ネットワーク")
+    st.markdown("実際の通信は、全国の拠点を結んだネットワークを通じて行われます")
     fig_network = create_network_topology()
     st.plotly_chart(fig_network, use_container_width=True)
 
 with tab2:
-    st.markdown("### 🧪 通信シミュレーション")
+    st.markdown("### 🧪 通信実験をしてみよう")
     
-    col1, col2 = st.columns(2)
+    # 実験の説明
+    st.markdown("""
+    <div class="simulation-explanation">
+    <strong>🎯 実験の目的</strong><br>
+    異なる条件で2つの通信方式を試して、どちらが速くて確実かを比べてみましょう！<br>
+    ネットワークの混雑具合やデータの大きさを変えると、結果がどう変わるかな？
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 実験設定
+    st.markdown("#### ⚙️ 実験条件を設定")
+    
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        source_node = st.selectbox("送信元ノード", ["A", "B", "C", "D", "E"], index=0)
+        st.markdown("**🌐 ネットワークの混雑度**")
+        network_load = st.slider(
+            "混雑度を選択", 
+            0, 100, 50,
+            help="0%=空いている、100%=大混雑"
+        )
+        if network_load < 30:
+            st.success("🟢 空いている：快適に使えそう！")
+        elif network_load < 70:
+            st.warning("🟡 普通：まあまあ使える")
+        else:
+            st.error("🔴 混雑：重くなりそう...")
     
     with col2:
-        destination_node = st.selectbox("宛先ノード", ["A", "B", "C", "D", "E"], index=2)
+        st.markdown("**📁 送信するデータの大きさ**")
+        message_size = st.selectbox(
+            "データサイズを選択",
+            [1, 5, 10, 50, 100],
+            index=2,
+            format_func=lambda x: f"{x} MB",
+            help="写真1枚≈5MB、動画≈50MB"
+        )
+        
+        # データサイズの説明
+        if message_size == 1:
+            st.info("📄 テキストファイル程度")
+        elif message_size == 5:
+            st.info("📸 写真1枚程度")
+        elif message_size == 10:
+            st.info("🎵 音楽ファイル程度")
+        elif message_size == 50:
+            st.info("🎬 短い動画程度")
+        else:
+            st.info("🎥 長い動画程度")
     
-    if source_node == destination_node:
-        st.warning("送信元と宛先は異なるノードを選択してください")
-    else:
+    with col3:
+        st.markdown("**📍 通信ルート**")
+        source_city = st.selectbox("送信元の都市", ["東京", "大阪", "福岡", "名古屋", "札幌"], index=0)
+        destination_city = st.selectbox("宛先の都市", ["東京", "大阪", "福岡", "名古屋", "札幌"], index=2)
+        
+        if source_city == destination_city:
+            st.warning("⚠️ 同じ都市は選べません")
+    
+    if source_city != destination_city:
+        st.markdown("#### 🚀 実験開始！")
+        
         col1, col2 = st.columns(2)
         
         with col1:
-            if st.button("📞 回線交換方式で送信", use_container_width=True):
-                with st.spinner("回線確保中..."):
-                    result = simulate_circuit_switching(source_node, destination_node, message_size, network_load)
+            st.markdown("##### 📞 回線交換方式で送信")
+            st.markdown("電話のように専用の回線を確保してから通信します")
+            
+            if st.button("📞 回線交換で送信", use_container_width=True, type="primary"):
+                with st.spinner("専用回線を確保しています..."):
+                    time.sleep(1)  # リアル感のための待機
+                    result = simulate_circuit_switching(source_city, destination_city, message_size, network_load)
                     st.session_state.circuit_messages.append(result)
                     
                 if result['success']:
                     st.markdown(f"""
                     <div class="success-box">
-                    ✅ {result['message']}
+                    <strong>✅ 成功！</strong><br>
+                    {result['message']}
                     </div>
                     """, unsafe_allow_html=True)
                 else:
                     st.markdown(f"""
                     <div class="error-box">
-                    ❌ {result['message']}
+                    <strong>❌ 失敗...</strong><br>
+                    {result['message']}
                     </div>
                     """, unsafe_allow_html=True)
                 
-                st.markdown("**処理ステップ：**")
+                st.markdown("**📋 何が起こったか：**")
                 for i, step in enumerate(result['steps'], 1):
                     st.write(f"{i}. {step}")
         
         with col2:
-            if st.button("📦 パケット交換方式で送信", use_container_width=True):
-                with st.spinner("パケット送信中..."):
-                    result = simulate_packet_switching(source_node, destination_node, message_size, network_load)
+            st.markdown("##### 📦 パケット交換方式で送信")
+            st.markdown("インターネットのようにデータを分割して通信します")
+            
+            if st.button("📦 パケット交換で送信", use_container_width=True, type="secondary"):
+                with st.spinner("パケットを送信しています..."):
+                    time.sleep(1)  # リアル感のための待機
+                    result = simulate_packet_switching(source_city, destination_city, message_size, network_load)
                     st.session_state.packet_messages.append(result)
                 
                 st.markdown(f"""
                 <div class="success-box">
-                ✅ {result['message']}
+                <strong>✅ 送信完了！</strong><br>
+                {result['message']}
                 </div>
                 """, unsafe_allow_html=True)
                 
-                st.markdown("**処理ステップ：**")
+                st.markdown("**📋 何が起こったか：**")
                 for i, step in enumerate(result['steps'], 1):
                     st.write(f"{i}. {step}")
     
-    # ネットワーク状況表示
-    st.markdown("### 📊 現在のネットワーク状況")
+    # 現在の状況表示
+    st.markdown("---")
+    st.markdown("#### 📊 現在のネットワーク状況")
     
     col1, col2, col3 = st.columns(3)
     
@@ -397,10 +464,10 @@ with tab2:
     
     with col3:
         expected_success = max(30, 100 - network_load)
-        st.metric("回線交換成功率", f"{expected_success:.0f}%")
+        st.metric("回線交換成功見込み", f"{expected_success:.0f}%")
 
 with tab3:
-    st.markdown("### 📊 シミュレーション結果比較")
+    st.markdown("### 📊 実験結果を比較してみよう")
     
     if st.session_state.circuit_messages or st.session_state.packet_messages:
         col1, col2 = st.columns(2)
@@ -408,35 +475,46 @@ with tab3:
         with col1:
             st.markdown("#### 📞 回線交換方式の結果")
             if st.session_state.circuit_messages:
+                st.markdown("**最近の実験結果：**")
                 for i, msg in enumerate(st.session_state.circuit_messages[-5:], 1):
                     if msg['success']:
-                        st.write(f"{i}. ✅ {msg['total_time']:.2f}秒で完了")
+                        st.write(f"✅ 実験{i}: {msg['total_time']:.2f}秒で成功")
                     else:
-                        st.write(f"{i}. ❌ 接続失敗")
+                        st.write(f"❌ 実験{i}: 接続に失敗")
             else:
-                st.write("まだシミュレーションを実行していません")
+                st.info("まだ実験していません")
         
         with col2:
             st.markdown("#### 📦 パケット交換方式の結果")
             if st.session_state.packet_messages:
+                st.markdown("**最近の実験結果：**")
                 for i, msg in enumerate(st.session_state.packet_messages[-5:], 1):
-                    st.write(f"{i}. ✅ {msg['total_time']:.2f}秒、再送{msg['failed_packets']}個")
+                    st.write(f"✅ 実験{i}: {msg['total_time']:.2f}秒、{msg['failed_packets']}個再送")
             else:
-                st.write("まだシミュレーションを実行していません")
+                st.info("まだ実験していません")
         
         # 性能比較チャート
         if st.session_state.circuit_messages and st.session_state.packet_messages:
-            st.markdown("### 📈 性能比較チャート")
+            st.markdown("### 📈 どちらが優秀？総合比較")
             comparison_chart = create_comparison_chart(
                 st.session_state.circuit_messages,
                 st.session_state.packet_messages
             )
             if comparison_chart:
                 st.plotly_chart(comparison_chart, use_container_width=True)
+                
+                st.markdown("""
+                <div class="info-box">
+                <strong>📖 グラフの見方</strong><br>
+                • <strong>転送時間</strong>: 短いほど良い（外側に近いほど速い）<br>
+                • <strong>安定性</strong>: 高いほど良い（外側に近いほど安定）<br>
+                • <strong>効率性</strong>: 高いほど良い（外側に近いほど効率的）
+                </div>
+                """, unsafe_allow_html=True)
         
         # 統計情報
         if len(st.session_state.circuit_messages) > 0 and len(st.session_state.packet_messages) > 0:
-            st.markdown("### 📋 統計サマリー")
+            st.markdown("### 📈 実験結果の統計")
             
             # 成功率計算
             circuit_success_rate = sum(1 for msg in st.session_state.circuit_messages if msg['success']) / len(st.session_state.circuit_messages) * 100
@@ -450,31 +528,55 @@ with tab3:
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
-                st.metric("回線交換成功率", f"{circuit_success_rate:.1f}%")
+                st.metric("📞 回線交換成功率", f"{circuit_success_rate:.1f}%")
             with col2:
-                st.metric("パケット交換成功率", f"{packet_success_rate:.1f}%")
+                st.metric("📦 パケット交換成功率", f"{packet_success_rate:.1f}%")
             with col3:
-                st.metric("回線交換平均時間", f"{avg_circuit_time:.2f}秒")
+                st.metric("📞 平均通信時間", f"{avg_circuit_time:.2f}秒")
             with col4:
-                st.metric("パケット交換平均時間", f"{avg_packet_time:.2f}秒")
+                st.metric("📦 平均通信時間", f"{avg_packet_time:.2f}秒")
         
         # 結果クリアボタン
-        if st.button("🗑️ 結果をクリア"):
+        st.markdown("---")
+        if st.button("🗑️ 実験結果をリセット", type="secondary"):
             st.session_state.circuit_messages = []
             st.session_state.packet_messages = []
+            st.success("実験結果をリセットしました！")
+            time.sleep(1)
             st.rerun()
     
     else:
-        st.info("シミュレーションタブで通信を実行してから結果を確認できます")
+        st.markdown("""
+        <div class="info-box">
+        <strong>🔬 実験結果はここに表示されます</strong><br>
+        「通信実験」タブで実際に通信を試してから、ここで結果を比較してみましょう！
+        </div>
+        """, unsafe_allow_html=True)
 
 # フッター
 st.markdown("---")
-st.markdown("""
-### 💡 学習のポイント
+st.markdown("### 💡 まとめ：どちらの方式が良い？")
 
-**回線交換方式**は電話のように専用回線を確保するため、安定していますが効率が悪い場合があります。
+col1, col2 = st.columns(2)
 
-**パケット交換方式**はデータを小分けにして送るため、効率的ですが混雑時には影響を受けやすくなります。
+with col1:
+    st.markdown("""
+    **📞 回線交換方式が得意なこと**
+    - 🎥 ビデオ通話（リアルタイム性が重要）
+    - 📞 音声通話（途切れると困る）
+    - 🏥 緊急通信（確実性が必要）
+    """)
 
-実際のインターネットはパケット交換方式を使用しており、この柔軟性により世界中の人々が同時にネットワークを利用できています！
+with col2:
+    st.markdown("""
+    **📦 パケット交換方式が得意なこと**
+    - 🌐 ウェブサイト閲覧
+    - 📧 メール送信
+    - 📱 SNS、チャット
+    - 🎮 オンラインゲーム
+    """)
+
+st.info("""
+🎯 **結論**: どちらも大切な技術で、用途によって使い分けられています！
+インターネットは主にパケット交換方式ですが、ビデオ通話などでは回線交換的な技術も使われています。
 """)
