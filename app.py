@@ -10,7 +10,7 @@ import queue
 
 # ページ設定
 st.set_page_config(
-    page_title="ネットワーク通信方式体験アプリ",
+    page_title="回線交換方式・パケット交換方式",
     page_icon="📡",
     layout="wide"
 )
@@ -266,7 +266,9 @@ def create_comparison_chart(circuit_results, packet_results):
     return fig
 
 # メインアプリケーション
-st.markdown('<p class="big-font">📡 ネットワーク通信方式体験アプリ</p>', unsafe_allow_html=True)
+st.markdown('<p class="big-font">回線交換方式・パケット交換方式（pp.104-105）</p>', unsafe_allow_html=True)
+st.caption("Created by Dit-Lab.(Daiki Ito)")
+st.caption("Supported by Tomoaki ATSUMI")
 st.markdown("**電話のような通信**と**インターネットのような通信**の違いを体験してみよう！")
 
 # タブ設定
