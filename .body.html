@@ -1,0 +1,118 @@
+  <section class="step" id="step1">
+    <h2><span class="no">STEP 1</span>2つの方式を並べて動かす</h2>
+    <p class="desc">3人が同時に送りたいとき、<span class="term" data-t="回線交換方式">回線交換方式</span>では順番待ち、<span class="term" data-t="パケット交換方式">パケット交換方式</span>では細かく分けて混ぜて送ります。</p>
+
+    <div class="panel">
+      <div class="btn-row" style="margin-bottom:12px">
+        <button class="btn primary" id="play">▶ 動かす</button>
+        <button class="btn" id="step1btn">1コマ進む</button>
+        <button class="btn ghost" id="resetAnim">最初から</button>
+        <span class="badge" id="tick">経過 0</span>
+      </div>
+      <div id="animBox"></div>
+      <div class="usercols" id="legend"></div>
+      <div class="grid c2" style="margin-top:14px">
+        <div class="metric" style="border:1px solid var(--rule);padding:12px">
+          <div class="k">回線交換方式：全員が送り終わるまで</div><div class="v" id="mCirc">—</div><div class="s">コマ</div>
+        </div>
+        <div class="metric" style="border:1px solid var(--rule);padding:12px">
+          <div class="k">パケット交換方式：全員が送り終わるまで</div><div class="v" id="mPack">—</div><div class="s">コマ</div>
+        </div>
+      </div>
+      <div class="note" id="animNote" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <section class="step" id="step2">
+    <h2><span class="no">STEP 2</span>利用者が増えるとどうなるか</h2>
+    <p class="desc">回線は<strong>1本</strong>のままで、利用者だけを増やします。それぞれの方式で「最後の人が終わるまでの時間」を比べましょう。</p>
+    <div class="panel">
+      <div class="grid c2">
+        <div>
+          <label class="fld" for="nUsers">同時に使う人数：<span class="mono" id="nUsersV">3</span> 人</label>
+          <input type="range" id="nUsers" min="1" max="12" step="1" value="3">
+          <label class="fld" style="margin-top:10px" for="dataSize">1人が送るデータ量：<span class="mono" id="dataSizeV">4</span> コマ分</label>
+          <input type="range" id="dataSize" min="1" max="10" step="1" value="4">
+          <label class="fld" style="margin-top:10px" for="idle">送るものが無い割合（待ち時間）：<span class="mono" id="idleV">50</span> ％</label>
+          <input type="range" id="idle" min="0" max="80" step="10" value="50">
+          <p class="why" style="margin-top:10px">電話のように「話していない間」も回線を占有するのが回線交換方式です。この割合を上げると差が広がります。</p>
+        </div>
+        <div>
+          <div class="metrics">
+            <div class="metric"><div class="k">回線交換：所要時間</div><div class="v" id="cTime">—</div><div class="s">コマ</div></div>
+            <div class="metric"><div class="k">パケット交換：所要時間</div><div class="v" id="pTime">—</div><div class="s">コマ</div></div>
+          </div>
+          <div class="metrics" style="margin-top:2px">
+            <div class="metric"><div class="k">回線の使用率（回線交換）</div><div class="v" id="cUse">—</div><div class="s">％</div></div>
+            <div class="metric"><div class="k">回線の使用率（パケット交換）</div><div class="v" id="pUse">—</div><div class="s">％</div></div>
+          </div>
+          <div class="note" id="simNote" style="margin-top:14px"></div>
+        </div>
+      </div>
+      <div id="cmpChart" style="margin-top:14px"></div>
+    </div>
+  </section>
+
+  <section class="step" id="step3">
+    <h2><span class="no">STEP 3</span>それぞれの長所と短所</h2>
+    <div class="cmp2">
+      <div class="box">
+        <h3>回線交換方式</h3>
+        <ul>
+          <li><strong>長所：</strong>通信中は回線を占有できるので、<strong>時間あたりに送れるデータ量が安定</strong>する。</li>
+          <li><strong>長所：</strong>いったんつながれば途切れにくい。</li>
+          <li><strong>短所：</strong>データを送っていない間も回線を占有するため<strong>効率が悪い</strong>。</li>
+          <li><strong>短所：</strong>回線の数より多くの人が同時に使えない。混んでいるとつながらない。</li>
+          <li>使われた例：従来の固定電話</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>パケット交換方式</h3>
+        <ul>
+          <li><strong>長所：</strong>回線を効率よく使い、<strong>回線数より多くの人が同時に通信</strong>できる。</li>
+          <li><strong>長所：</strong>1本の回線に異なる宛先のパケットが混ざってよい。</li>
+          <li><strong>短所：</strong>混雑すると遅くなり、<strong>通信速度は保障されない</strong>。</li>
+          <li><strong>短所：</strong>分割・組み立ての処理が必要。</li>
+          <li>使われている例：インターネット</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note warn" style="margin-top:14px">
+      <strong>まちがえやすい点。</strong>「安全だから暗号化が不要」「必ず接続できる」はどちらの方式の長所でもありません。
+      パケット交換方式でも通信内容は暗号化しなければ守れません。
+    </div>
+  </section>
+
+  <section class="step" id="step4">
+    <h2><span class="no">STEP 4</span>どちらの説明か判定する</h2>
+    <p class="desc">記述がどちらの方式のものかを選んでください。本文の問1と同じ形式です。</p>
+    <div class="panel">
+      <div class="qhead">
+        <span class="badge" id="qProgress">1 / 1</span>
+        <span class="badge">正解 <span class="score" id="qScore">0</span></span>
+      </div>
+      <div class="card-q"><div class="q-scene" id="qText"></div></div>
+      <div class="choice4" id="qChoices"></div>
+      <div class="note" id="qFb" hidden style="margin-top:12px"></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn primary" id="qNext" disabled>次の問題</button>
+        <button class="btn ghost" id="qReset">最初から</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="glossary">
+    <h2><span class="no">用語</span>この節で出てくることば</h2>
+    <div id="glossBox"></div>
+  </section>
+
+  <section class="step">
+    <h2><span class="no">まとめ</span>2つの方式のポイント</h2>
+    <ul style="margin:0;padding-left:1.2em;color:var(--ink-2);font-size:.92rem;line-height:2.05">
+      <li>回線交換方式＝<strong>占有</strong>。安定するが効率が悪い。</li>
+      <li>パケット交換方式＝<strong>分割して共有</strong>。効率がよいが速度は保障されない。</li>
+      <li>パケットには<strong>宛先の情報</strong>がついているので、混ざっても正しく届く。</li>
+      <li>「回線数より多くのユーザが同時に通信できる」のはパケット交換方式の長所。</li>
+      <li>「時間あたりに通信できるデータ量が安定する」のは回線交換方式の長所。</li>
+    </ul>
+  </section>
