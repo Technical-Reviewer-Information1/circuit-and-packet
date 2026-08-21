@@ -278,3 +278,23 @@ input.pin{font-size:1.05rem; padding:7px 10px; border:1px solid var(--rule); bor
 .choice4 .btn.on{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); font-weight:700}
 /* 設問文の見出し（flex ではなく通常の段落。.qhead は左右振り分け用なので用途が別） */
 .pq{margin:0 0 10px; font-weight:700; line-height:1.85}
+
+/* --- 自分のテーマでやってみる（ワークシート） --- */
+.wsheet{display:grid; gap:14px}
+@media(min-width:760px){ .wsheet{grid-template-columns:1fr 1fr} }
+.wsf{display:block}
+.wsf .wsl{display:block; font-weight:700; font-size:.9rem; margin-bottom:3px}
+.wsf .wsh{display:block; font-size:.78rem; color:var(--muted); margin-bottom:5px; line-height:1.6}
+.wsf textarea{width:100%; max-width:100%; font:inherit; font-size:.92rem; line-height:1.75;
+  padding:8px 10px; border:1px solid var(--rule); border-radius:3px; background:#fff; resize:vertical}
+.wsf textarea:focus{outline:2px solid var(--accent); outline-offset:-2px}
+.wsout{margin-top:14px; border:1px solid var(--ink-3); border-radius:3px; background:#fff; padding:16px 18px}
+.wsout h4{margin:0 0 10px; font-size:1rem}
+.wsout dl{margin:0}
+.wsout dt{font-weight:700; font-size:.84rem; color:var(--accent); margin-top:10px}
+.wsout dd{margin:2px 0 0; font-size:.92rem; line-height:1.85; white-space:pre-wrap}
+.wsout .wsmsg{margin:10px 0 0; font-size:.86rem; color:var(--muted)}
+@media print{
+  .app-header, .btn-row, .step:not(.wsprint){ display:none !important }
+  .wsout{border:none; padding:0}
+}
